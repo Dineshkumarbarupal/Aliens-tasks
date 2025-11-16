@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>E-Commerce Store</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 20px; }
+        .product { border: 1px solid #ddd; padding: 15px; margin: 10px; display: inline-block; }
+        .button { background: #007bff; color: white; padding: 10px; border: none; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>Welcome to Our E-Commerce Store</h1>
+    
+    <div id="login-section">
+        <h3>Login</h3>
+        <input type="text" id="username" placeholder="Username" value="testuser">
+        <input type="password" id="password" placeholder="Password" value="password">
+        <button onclick="login()" class="button">Login</button>
+    </div>
+
+    <div id="products-section" style="display:none;">
+        <h2>Products</h2>
+        <div id="products-list"></div>
+    </div>
+
+    <script>
+        async function login() {
+            const response = await fetch('/api/login', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    username: document.getElementById('username').value,
+                    password: document.getElementById('password').value
+                })
+            });
+            
+            const result = await response.json();
+            if (result.success) {
+                document.getElementById('login-section').style.display = 'none';
+                document.getElementById('products-section').style.display = 'block';
+                loadProducts();
+            } else {
+                alert('Login failed: ' + result.message);
+            }
+        }
+
+        async function loadProducts() {
+            const response = await fetch('/api/products');
+            const products = await response.json();
+            
+            const productsList = document.getElementById('products-list');
+            productsList.innerHTML = '';
+            
+            products.forEach(product => {
+                const productDiv = document.createElement('div');
+                productDiv.className = 'product';
+                productDiv.innerHTML = `
+                    <h3>${product.name}</h3>
+                    <p>$${product.price}</p>
+                    <p>${product.description}</p>
+                    <button onclick="buyProduct(${product.id})" class="button">Buy Now</button>
+                `;
+                productsList.appendChild(productDiv);
+            });
+        }
+
+        async function buyProduct(productId) {
+            const response = await fetch('/api/order', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({product_id: productId, quantity: 1})
+            });
+            
+            const result = await response.json();
+            if (result.success) {
+                alert(`Order placed! Total: $${result.total}`);
+            } else {
+                alert('Order failed: ' + result.message);
+            }
+        }
+    </script>
+</body>
+</html>

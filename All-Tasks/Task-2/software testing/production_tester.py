@@ -31,7 +31,7 @@ class ProductionTester:
                 'details': f"Status Code: {response.status_code}"
             }
         except Exception as e:
-            pyautogui.screenshot('test_uptime_error{}')
+            # pyautogui.screenshot('test_uptime_error.png')
             return {'status': False, 'details': str(e)}
     
     def test_ssl_certificate(self):
